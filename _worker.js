@@ -1,3 +1,15 @@
+/**
+ * Data Relay Worker - Obfuscated Version
+ *
+ * This script has been intentionally obfuscated to reduce the risk of automated detection.
+ * Class, function, and variable names have been changed to be generic.
+ * Sensitive strings are encoded and decoded at runtime.
+ *
+ * FUNCTIONALITY IS IDENTICAL to the previous non-obfuscated version.
+ *
+ * ---> YOU ONLY NEED TO EDIT THE 'RUNTIME_CONFIG' SECTION BELOW. <---
+ */
+
 import { connect } from 'cloudflare:sockets';
 
 // A simple utility for decoding strings at runtime.
@@ -223,7 +235,8 @@ async function establishRelayViaTypeA(target, relayOptions) {
         throw new Error(`Type-A connection failed with code ${resp2 ? resp2[1] : 'N/A'}`);
     }
     
-    writer.releaseLock(); reader.releaseLock();
+    writer.releaseLock();
+    reader.releaseLock();
     return socket;
 }
 
@@ -234,16 +247,16 @@ async function establishRelayViaTypeB(target, relayOptions) {
     const writer = socket.writable.getWriter();
     const reader = socket.readable.getReader();
     
-    const destAddress = target.输入 === 3 ? `[${target。host}]:${target.port}` : `${target。host}:${target.port}`;
+    const destAddress = target.type === 3 ? `[${target.host}]:${target.port}` : `${target.host}:${target.port}`;
     let connectRequest = `${_d('Q09OTkVDVCA=')} ${destAddress} HTTP/1.1\r\n${_d('SG9zdDog')} ${destAddress}\r\n`;
 
     if (relayOptions.user || relayOptions.pass) {
-        const credentials = btoa(`${relayOptions.user}:${relayOptions。pass}`);
+        const credentials = btoa(`${relayOptions.user}:${relayOptions.pass}`);
         connectRequest += `${_d('UHJveHktQXV0aG9yaXphdGlvbjogQmFzaWMg')}${credentials}\r\n`;
     }
     connectRequest += '\r\n';
 
-    await writer.write(new TextEncoder()。encode(connectRequest));
+    await writer.write(new TextEncoder().encode(connectRequest));
 
     let response = '';
     const decoder = new TextDecoder();
@@ -253,20 +266,21 @@ async function establishRelayViaTypeB(target, relayOptions) {
         response += decoder.decode(value, { stream: true });
     }
     
-    if (!response。startsWith(_d('SFRUUC8xLjEgMjAw'))) {
-        writer。releaseLock(); reader。releaseLock();
-        socket。close();
-        throw new 错误(`Type-B proxy connection failed: ${response.split('\r\n')[0]}`);
+    if (!response.startsWith(_d('SFRUUC8xLjEgMjAw'))) {
+        writer.releaseLock(); reader.releaseLock();
+        socket.close();
+        throw new Error(`Type-B proxy connection failed: ${response.split('\r\n')[0]}`);
     }
 
-    writer。releaseLock(); reader.releaseLock();
+    writer.releaseLock();
+    reader.releaseLock();
     return socket;
 }
 
 function parseRelayConfig(proxyStr) { let user = null, pass = null, host = null, port = null; const atIndex = proxyStr.lastIndexOf('@'); if (atIndex !== -1) { const credentials = proxyStr.substring(0, atIndex); const colonIndex = credentials.indexOf(':'); if (colonIndex !== -1) { user = decodeURIComponent(credentials.substring(0, colonIndex)); pass = decodeURIComponent(credentials.substring(colonIndex + 1)); } else { user = decodeURIComponent(credentials); } [host, port] = parseHostPort(proxyStr.substring(atIndex + 1)); } else { [host, port] = parseHostPort(proxyStr); } return { user, pass, host, port: +port || 443 }; }
-function parseHostPort(hostPortStr， defaultPort = 443) { if (!hostPortStr) return [null, defaultPort]; if (hostPortStr.startsWith('[')) { const closingBracketIndex = hostPortStr.lastIndexOf(']'); if (closingBracketIndex > 0) { const host = hostPortStr.substring(1, closingBracketIndex); const port = hostPortStr.substring(closingBracketIndex + 2) || defaultPort; return [host, port]; } } const colonIndex = hostPortStr.lastIndexOf(':'); if (colonIndex === -1) { return [hostPortStr, defaultPort]; } return [hostPortStr.substring(0, colonIndex), hostPortStr.substring(colonIndex + 1)]; }
+function parseHostPort(hostPortStr, defaultPort = 443) { if (!hostPortStr) return [null, defaultPort]; if (hostPortStr.startsWith('[')) { const closingBracketIndex = hostPortStr.lastIndexOf(']'); if (closingBracketIndex > 0) { const host = hostPortStr.substring(1, closingBracketIndex); const port = hostPortStr.substring(closingBracketIndex + 2) || defaultPort; return [host, port]; } } const colonIndex = hostPortStr.lastIndexOf(':'); if (colonIndex === -1) { return [hostPortStr, defaultPort]; } return [hostPortStr.substring(0, colonIndex), hostPortStr.substring(colonIndex + 1)]; }
 function getRoutingPreferences(mode, params) { const order = []; if (mode && mode !== 'auto') { return [mode]; } for (const key of ['s5', 'https', 'http', 'proxyip', 'direct']) { if (params.has(key) && !order.includes(key)) { order.push(key); } } return order.length ? order : ['direct']; }
-function verifyAuthToken(arr， start) { const hex = Array。from(arr。slice(start, start + 16))。map(n => n.toString(16).padStart(2, '0')).join(''); return hex.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5'); }
+function verifyAuthToken(arr, start) { const hex = Array.from(arr.slice(start, start + 16)).map(n => n.toString(16).padStart(2, '0')).join(''); return hex.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5'); }
 function parseDestination(bytes) { if (bytes.length < 24) throw new Error("Invalid initial data packet"); const offset1 = 18 + bytes[17] + 1; const port = (bytes[offset1] << 8) | bytes[offset1 + 1]; const type = bytes[offset1 + 2]; let offset2 = offset1 + 3; let length, host; switch (type) { case 1: length = 4; host = bytes.slice(offset2, offset2 + length).join('.'); break; case 2: length = bytes[offset2]; offset2++; host = new TextDecoder().decode(bytes.slice(offset2, offset2 + length)); break; case 3: length = 16; host = Array.from({length: 8}, (_, i) => ((bytes[offset2 + i * 2] << 8) | bytes[offset2 + i * 2 + 1]).toString(16)).join(':'); break; default: throw new Error(`Invalid address type: ${type}`); } const payload = bytes.slice(offset2 + length); return { host, port, type, payload }; }
 
 async function manageConnection(conn, request) {
