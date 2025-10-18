@@ -25,7 +25,7 @@ const RUNTIME_CONFIG = {
     // 备用恢复节点 (原 Fallback Proxy IP)
     // 如果所有用户指定的路由都失败，将使用此节点作为最后的尝试。
     // 设置为 null 或 "" 来禁用。
-    RECOVERY_NODE: "ProxyIP.SG.CMLiussss.net:443",
+    RECOVERY_NODE: "",
 
     // 传输参数
     packetMtu: 1350,
